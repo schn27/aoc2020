@@ -3,27 +3,29 @@
 function calc() {
 	const numbers = input.match(/\d+/g).map(Number);
 
-	let part1 = 0;
-	let part2 = 0;
+	return getPart1(numbers) + " " + getPart2(numbers);
+}
 
+function getPart1(numbers) {
 	for (let i = 0; i < numbers.length - 1; ++i) {
 		for (let j = i + 1; j < numbers.length; ++j) {
-			let sum = numbers[i] + numbers[j];
+			if (numbers[i] + numbers[j] == 2020) {
+				return numbers[i] * numbers[j];
+			}
+		}
+	}
+}
 
-			if (sum == 2020) {
-				part1 = numbers[i] * numbers[j];
-
-			} else if (sum < 2020) {
-				for (let k = j + 1; k < numbers.length; ++k) {
-					if (sum + numbers[k] == 2020) {
-						part2 = numbers[i] * numbers[j] * numbers[k];
-					}
+function getPart2(numbers) {
+	for (let i = 0; i < numbers.length - 2; ++i) {
+		for (let j = i + 1; j < numbers.length - 1; ++j) {
+			for (let k = j + 1; k < numbers.length; ++k) {
+				if (numbers[i] + numbers[j] + numbers[k] == 2020) {
+					return numbers[i] * numbers[j] * numbers[k];
 				}
 			}
 		}
 	}
-
-	return `${part1} ${part2}`;
 }
 
 const input = `1130
