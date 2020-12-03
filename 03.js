@@ -19,14 +19,8 @@ function getTrees(map, slope) {
 	while (y < map.length) {
 		trees += map[y][x];
 		
-		x += slope[0];
+		x = (x + slope[0]) % map[0].length;
 		y += slope[1];
-		
-		if (x < 0) {
-			x += map[0].length;
-		} else if (x >= map[0].length) {
-			x -= map[0].length;
-		}
 	}
 
 	return trees;
