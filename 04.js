@@ -1,33 +1,10 @@
 "use strict";
 
 function calc() {
-	let part1 = 0;
-	let part2 = 0;
+	const passports = input.split("\n\n").map(p => p.split(/\s/g));
 
-	input.split("\n\n").forEach(pass => {
-		let keys1 = 0;
-		let keys2 = 0;
-
-		pass.split(/\s/g).forEach(pair => {
-			const tokens = pair.split(":");
-
-			if (isValid1(tokens[0])) {
-				++keys1;
-			}
-
-			if (isValid2(tokens[0], tokens[1])) {
-				++keys2;
-			}
-		});
-		
-		if (keys1 == 7) {
-			++part1;
-		}
-
-		if (keys2 == 7) {
-			++part2;
-		}
-	});
+	const part1 = passports.filter(p => p.filter(kv => isValid1(...kv.split(":"))).length == 7).length;
+	const part2 = passports.filter(p => p.filter(kv => isValid2(...kv.split(":"))).length == 7).length;
 
 	return part1 + " " + part2;
 }
@@ -47,13 +24,13 @@ function isValid2(key, value) {
 		case "eyr":
 			return num >= 2020 && num <= 2030;
 		case "hgt":
-			return ((value.match("cm") || []).length > 0 && num >= 150 && num <= 193) || ((value.match("in") || []).length > 0 && num >= 59 && num <= 76);
+			return (value.endsWith("cm") && num >= 150 && num <= 193) || (value.endsWith("in") && num >= 59 && num <= 76);
 		case "hcl":
-			return (value.match(/#[0-9a-f]{6}/g) || []).length > 0 && value.length == 7;
+			return value.search(/^#[0-9a-f]{6}$/g) >= 0;
 		case "ecl":
 			return ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"].indexOf(value) >= 0;
 		case "pid":
-			return (value.match(/\d{9}/g) || []).length > 0 && value.length == 9;
+			return value.search(/^\d{9}$/g) >= 0;
 		default:
 			return false;
 	}
