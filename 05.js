@@ -2,8 +2,7 @@
 
 function calc() {
 	const ids = input.split("\n").map(s => 
-		s.split("").map(c => (c == "B" || c == "R") ? 1 : 0)
-		.reverse().reduce((id, c, i) => id | (c << i), 0));
+		parseInt(s.replace(/[FL]/g, "0").replace(/[BR]/g, "1"), 2));
 
 	ids.sort();
 
