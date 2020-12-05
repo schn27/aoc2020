@@ -8,7 +8,7 @@ function calc() {
 
 	const part1 = ids[ids.length - 1];
 
-	const part2 = ids.filter((id, i) => (i > 0) && (id != ids[i - 1] + 1))[0] - 1;
+	const part2 = ids.find((id, i) => (i > 0) && (id != ids[i - 1] + 1)) - 1;
 
 	return part1 + " " + part2;
 }
