@@ -3,12 +3,8 @@
 function calc() {
 	const groups = input.split("\n\n");
 
-	const part1 = groups.map(g => {
-		const answers = {};
-		g.match(/[a-z]/g).forEach(e => answers[e] = 1);
-		return Object.keys(answers).length;
-
-	}).reduce((a, e) => a + e, 0);
+	const part1 = groups.map(g => (new Set(g.match(/[a-z]/g))).size)
+		.reduce((a, e) => a + e, 0);
 
 	const part2 = groups.map(g => {
 		const answers = {};
