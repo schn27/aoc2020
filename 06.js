@@ -14,8 +14,8 @@ function calc() {
 		const answers = {};
 		g.match(/[a-z]/g).forEach(e => answers[e] = (answers[e] || 0) + 1);
 
-		const peoples = g.split(/\s+/g).length;
-		return Object.keys(answers).filter(k => answers[k] == peoples).length;
+		const people = g.split(/\s+/g).length;
+		return Object.keys(answers).filter(k => answers[k] == people).length;
 
 	}).reduce((a, e) => a + e, 0);
 
