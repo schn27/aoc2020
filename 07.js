@@ -5,7 +5,7 @@ function calc() {
 
 	input.split("\n").forEach(line => {
 		const [left, right] = line.split(" bags contain ");
-		bagsMap[left] = (right.match(/\d+\s[\w\s]+/g) || [])
+		bagsMap[left] = (right.match(/\d+[\w\s]+/g) || [])
 			.map(b => ({count: parseInt(b), name: b.replace(/\sbags?|\d+\s/g, "")}));
 	});
 
