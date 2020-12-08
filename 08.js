@@ -36,11 +36,10 @@ function getProgramResult(program) {
 
 function getModifiedProgramResult(program) {
 	for (let i = 0; i < program.length; ++i) {
-		if ((program[i].op == "jmp") || (program[i].op == "nop" && program[i].arg != 0)) {
-			const mod = [...program].map(e => ({...e}));
-			mod[i].op = mod[i].op == "nop" ? "jmp" : "nop";
-			
-			const res = getProgramResult(mod);
+		if (program[i].op == "jmp" || program[i].op == "nop") {
+			toggleJmpNop(program[i]);			
+			const res = getProgramResult(program);
+			toggleJmpNop(program[i]);
 			
 			if (res.terminated) {
 				return res;
@@ -49,6 +48,10 @@ function getModifiedProgramResult(program) {
 	}
 
 	throw "no solution";
+}
+
+function toggleJmpNop(opcode) {
+	opcode.op = (opcode.op == "jmp") ? "nop" : "jmp";
 }
 
 const input = `acc +15
