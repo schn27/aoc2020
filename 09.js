@@ -15,7 +15,7 @@ function calc() {
 
 function isXmasRule(preamble, x) {
 	const set = new Set(preamble);
-	return preamble.findIndex(n => set.has(x - n)) >= 0;
+	return preamble.findIndex(n => set.has(x - n) && n != x - n) >= 0;
 }
 
 function getContiguousRange(nums, target) {
