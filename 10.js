@@ -2,37 +2,25 @@
 
 function calc() {
 	let adapters = input.match(/\d+/g).map(Number).sort((a, b) => a - b);
-	adapters = [0, ...adapters, Math.max(...adapters) + 3];
+	adapters = [...adapters, Math.max(...adapters) + 3];
 
-	const count1 = adapters.filter((value, i) => value - adapters[i - 1] == 1).length;
-	const count3 = adapters.filter((value, i) => value - adapters[i - 1] == 3).length;
-	const part1 = count1 * count3;
+	const diffs = adapters.map((value, i) => value - (adapters[i - 1] || 0));
+	const part1 =  diffs.filter(d => d == 1).length * diffs.filter(d => d == 3).length;
 
 	const part2 = getNumberOfWays(adapters);
 
 	return part1 + " " + part2;
 }
 
-function getNumberOfWays(list, cache = {}) {
-	let res = cache[list.join(",")];
+function getNumberOfWays(adapters) {
+	const ways = {0: 1};
+	
+	adapters.forEach(current => 
+		[current - 1, current - 2, current - 3]
+		.filter(candidate => ways[candidate])
+		.forEach(candidate => ways[current] = (ways[current] || 0) + ways[candidate]));
 
-	if (res == undefined) {
-		res = 1;
-
-		for (let i = 1; i < list.length; ++i) {
-			if (list[i + 1] - list[i - 1] <= 3) {
-				res += getNumberOfWays(list.slice(i + 1), cache);
-			}
-
-			if (list[i + 2] - list[i - 1] <= 3) {
-				res += getNumberOfWays(list.slice(i + 2), cache);
-			}			
-		}
-
-		cache[list.join(",")] = res;
-	}
-
-	return res;
+	return ways[adapters[adapters.length - 1]];
 }
 
 const input = `77
