@@ -14,11 +14,9 @@ function calc() {
 
 function getNumberOfWays(adapters) {
 	const ways = {0: 1};
-	
-	adapters.forEach(current => 
-		[current - 1, current - 2, current - 3]
-		.filter(candidate => ways[candidate])
-		.forEach(candidate => ways[current] = (ways[current] || 0) + ways[candidate]));
+
+	adapters.forEach(v => 
+		ways[v] = [v - 1, v - 2, v - 3].reduce((a, c) => a + (ways[c] || 0), 0));
 
 	return ways[adapters[adapters.length - 1]];
 }
