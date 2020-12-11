@@ -1,52 +1,49 @@
 "use strict";
 
 function calc() {
-	const map = input.split("\n").map(line => line.split(""));
+	const layout = input.split("\n").map(line => line.split(""));
 	
 	const directions = [[-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 0], [1, 1], [0, -1], [0, 1]];
 
-	const part1 = getFinalOccupiedSeats(map, 4, (map, x, y) => 
-		directions.filter(([dx, dy]) => (map[y + dy] || [])[x + dx] == "#").length);
+	const part1 = getFinalOccupiedSeats(layout, 4, (layout, x, y) => 
+		directions.filter(([dx, dy]) => (layout[y + dy] || [])[x + dx] == "#").length);
 
-	const part2 = getFinalOccupiedSeats(map, 5, (map, x, y) => 
-		directions.filter(([dx, dy]) => isSeeingOccupied(map, x, y, dx, dy)).length);
+	const part2 = getFinalOccupiedSeats(layout, 5, (layout, x, y) => 
+		directions.filter(([dx, dy]) => isSeeingOccupied(layout, x, y, dx, dy)).length);
 
 	return part1 + " " + part2;
 }
 
-function getFinalOccupiedSeats(map, tolerance, occupied) {
+function getFinalOccupiedSeats(layout, tolerance, occupied) {
 	for (let changed = true; changed;) {
 		changed = false;
-		const newMap = [...map].map(row => [...row]);
 
-		for (let y = 0; y < map.length; ++y) {
-			for (let x = 0; x < map[0].length; ++x) {
-				if (map[y][x] == "L" && occupied(map, x, y) == 0) {
-					newMap[y][x] = "#";
-					changed = true;
-				} else if (map[y][x] == "#" && occupied(map, x, y) >= tolerance) {
-					newMap[y][x] = "L";
-					changed = true;
-				}
+		layout = layout.map((r, y) => r.map((s, x) => {
+			if (s == "L" && occupied(layout, x, y) == 0) {
+				changed = true;
+				s = "#";
+			} else if (s == "#" && occupied(layout, x, y) >= tolerance) {
+				changed = true;
+				s = "L";
 			}
-		}
 
-		map = newMap;
+			return s;
+		}));
 	}
 
-	return map.reduce((a, r) => a + r.filter(s => s == "#").length, 0);
+	return layout.reduce((a, r) => a + r.filter(s => s == "#").length, 0);
 }
 
-function isSeeingOccupied(map, x, y, dx, dy) {
+function isSeeingOccupied(layout, x, y, dx, dy) {
 	for (;;) {
 		x += dx;
 		y += dy;
 
-		if (map[y] == undefined || map[y][x] == undefined || map[y][x] == "L") {
+		if ((layout[y] || [])[x] == undefined || layout[y][x] == "L") {
 			return false;
 		}
 
-		if (map[y][x] == "#") {
+		if (layout[y][x] == "#") {
 			return true;
 		}
 	}
