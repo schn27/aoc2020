@@ -6,10 +6,10 @@ function calc() {
 	const directions = [[-1, -1], [-1, 0], [-1, 1], [1, -1], [1, 0], [1, 1], [0, -1], [0, 1]];
 
 	const part1 = getFinalOccupiedSeats(map, 4, (map, x, y) => 
-		directions.filter(dxdy => (map[y + dxdy[1]] || [])[x + dxdy[0]] == "#").length);
+		directions.filter(([dx, dy]) => (map[y + dy] || [])[x + dx] == "#").length);
 
 	const part2 = getFinalOccupiedSeats(map, 5, (map, x, y) => 
-		directions.filter(dxdy => isSeeingOccupied(map, x, y, dxdy)).length);
+		directions.filter(([dx, dy]) => isSeeingOccupied(map, x, y, dx, dy)).length);
 
 	return part1 + " " + part2;
 }
@@ -39,10 +39,10 @@ function getFinalOccupiedSeats(map, tolerance, occupied) {
 	return map.reduce((a, r) => a + r.filter(s => s == "#").length, 0);
 }
 
-function isSeeingOccupied(map, x, y, dxdy) {
+function isSeeingOccupied(map, x, y, dx, dy) {
 	for (;;) {
-		x += dxdy[0];
-		y += dxdy[1];
+		x += dx;
+		y += dy;
 
 		if (map[y] == undefined || map[y][x] == undefined || map[y][x] == "L") {
 			return false;
