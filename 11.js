@@ -21,12 +21,10 @@ function getFinalOccupiedSeats(map, tolerance, occupied) {
 
 		for (let y = 0; y < map.length; ++y) {
 			for (let x = 0; x < map[0].length; ++x) {
-				const n = occupied(map, x, y);
-
-				if (map[y][x] == "L" && n == 0) {
+				if (map[y][x] == "L" && occupied(map, x, y) == 0) {
 					newMap[y][x] = "#";
 					changed = true;
-				} else if (map[y][x] == "#" && n >= tolerance) {
+				} else if (map[y][x] == "#" && occupied(map, x, y) >= tolerance) {
 					newMap[y][x] = "L";
 					changed = true;
 				}
