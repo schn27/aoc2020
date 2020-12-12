@@ -16,7 +16,8 @@ function part1(list) {
 		N: value => pos = doMove(pos, {n:  1, e:  0}, value),
 		S: value => pos = doMove(pos, {n: -1, e:  0}, value),
 		W: value => pos = doMove(pos, {n:  0, e: -1}, value),
-		E: value => pos = doMove(pos, {n:  0, e:  1}, value)	}
+		E: value => pos = doMove(pos, {n:  0, e:  1}, value)
+	};
 
 	list.forEach(({cmd, value}) => commands[cmd](value));
 
@@ -35,7 +36,7 @@ function part2(list) {
 		S: value => wpt = doMove(wpt, {n: -1, e:  0}, value),
 		W: value => wpt = doMove(wpt, {n:  0, e: -1}, value),
 		E: value => wpt = doMove(wpt, {n:  0, e:  1}, value)
-	}
+	};
 
 	list.forEach(({cmd, value}) => commands[cmd](value));
 
