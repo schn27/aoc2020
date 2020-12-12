@@ -2,96 +2,56 @@
 
 function calc() {
 	const list = input.split("\n").map(line => ({cmd: line[0], value: +line.substring(1)}));
-
-	const part1 = exec1(list);
-
-	const part2 = exec2(list);
-
-	return part1 + " " + part2;
+	return part1(list) + " " + part2(list);
 }
 
-function exec1(list) {
-	let heading = 90;
-	let posNE = [0, 0];
+function part1(list) {
+	let heading = {n: 0, e: 1};
+	let pos = {n: 0, e: 0};
 
-	list.forEach(({cmd, value}) => {
-		switch (cmd) {
-			case "L":
-				heading = (360 + heading - value) % 360;
-				break;
-			case "R":
-				heading = (heading + value) % 360;
-				break;
-			case "F":
-				posNE = doMove(posNE, heading, value);
-				break;
-			case "N":
-				posNE = doMove(posNE, 0, value);
-				break;
-			case "S":
-				posNE = doMove(posNE, 180, value);
-				break;
-			case "W":
-				posNE = doMove(posNE, 270, value);
-				break;
-			case "E":
-				posNE = doMove(posNE, 90, value);
-				break;
-		}
-	});
+	const commands = {
+		L: value => heading = doRotate(heading, value, -1),
+		R: value => heading = doRotate(heading, value, 1),
+		F: value => pos = doMove(pos, heading, value),
+		N: value => pos = doMove(pos, {n:  1, e:  0}, value),
+		S: value => pos = doMove(pos, {n: -1, e:  0}, value),
+		W: value => pos = doMove(pos, {n:  0, e: -1}, value),
+		E: value => pos = doMove(pos, {n:  0, e:  1}, value)	}
 
-	return 	Math.abs(posNE[0]) + Math.abs(posNE[1]);
+	list.forEach(({cmd, value}) => commands[cmd](value));
+
+	return Math.abs(pos.n) + Math.abs(pos.e);
 }
 
-function exec2(list) {
-	let posNE = [0, 0];
-	let wpt = [1, 10];
+function part2(list) {
+	let wpt = {n: 1, e: 10};
+	let pos = {n: 0, e: 0};
 
-	list.forEach(({cmd, value}) => {
-		switch (cmd) {
-			case "L":
-				wpt = doRotate(wpt, value, false);
-				break;
-			case "R":
-				wpt = doRotate(wpt, value, true);
-				break;
-			case "F":
-				posNE = [posNE[0] + wpt[0] * value, posNE[1] + wpt[1] * value];
-				break;
-			case "N":
-				wpt = doMove(wpt, 0, value);
-				break;
-			case "S":
-				wpt = doMove(wpt, 180, value);
-				break;
-			case "W":
-				wpt = doMove(wpt, 270, value);
-				break;
-			case "E":
-				wpt = doMove(wpt, 90, value);
-				break;
-		}
-
-	});
-
-	return 	Math.abs(posNE[0]) + Math.abs(posNE[1]);
-}
-
-function doMove(posNE, heading, dist) {
-	const dirs = {0: [1, 0], 90: [0, 1], 180: [-1, 0], 270: [0, -1]};
-	return [posNE[0] + dist * dirs[heading][0], posNE[1] + dist * dirs[heading][1]];
-}
-
-function doRotate(posNE, degrees, right) {
-	const res = [...posNE];
-
-	for (; degrees > 0; degrees -= 90) {
-		const t = res[0];
-		res[0] = right ? -res[1] : res[1];
-		res[1] = right ? t : -t;
+	const commands = {
+		L: value => wpt = doRotate(wpt, value, -1),
+		R: value => wpt = doRotate(wpt, value, 1),
+		F: value => pos = doMove(pos, wpt, value),
+		N: value => wpt = doMove(wpt, {n:  1, e:  0}, value),
+		S: value => wpt = doMove(wpt, {n: -1, e:  0}, value),
+		W: value => wpt = doMove(wpt, {n:  0, e: -1}, value),
+		E: value => wpt = doMove(wpt, {n:  0, e:  1}, value)
 	}
 
-	return res;
+	list.forEach(({cmd, value}) => commands[cmd](value));
+
+	return Math.abs(pos.n) + Math.abs(pos.e);
+}
+
+function doMove(pos, heading, dist) {
+	return {n: pos.n + heading.n * dist, e: pos.e + heading.e * dist};
+}
+
+function doRotate(pos, degrees, dir) {
+	for (; degrees > 0; degrees -= 90) {
+		pos = {n: -dir * pos.e, e: dir * pos.n};
+	}
+
+	return pos;
 }
 
 const input = `S3
