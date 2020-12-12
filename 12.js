@@ -10,13 +10,13 @@ function part1(list) {
 	let pos = {n: 0, e: 0};
 
 	const commands = {
-		L: value => heading = doRotate(heading, value, -1),
-		R: value => heading = doRotate(heading, value, 1),
-		F: value => pos = doMove(pos, heading, value),
-		N: value => pos = doMove(pos, {n:  1, e:  0}, value),
-		S: value => pos = doMove(pos, {n: -1, e:  0}, value),
-		W: value => pos = doMove(pos, {n:  0, e: -1}, value),
-		E: value => pos = doMove(pos, {n:  0, e:  1}, value)
+		L: value => heading = rotate(heading, value, -1),
+		R: value => heading = rotate(heading, value, 1),
+		F: value => pos = move(pos, heading, value),
+		N: value => pos = move(pos, {n:  1, e:  0}, value),
+		S: value => pos = move(pos, {n: -1, e:  0}, value),
+		W: value => pos = move(pos, {n:  0, e: -1}, value),
+		E: value => pos = move(pos, {n:  0, e:  1}, value)
 	};
 
 	list.forEach(({cmd, value}) => commands[cmd](value));
@@ -29,13 +29,13 @@ function part2(list) {
 	let pos = {n: 0, e: 0};
 
 	const commands = {
-		L: value => wpt = doRotate(wpt, value, -1),
-		R: value => wpt = doRotate(wpt, value, 1),
-		F: value => pos = doMove(pos, wpt, value),
-		N: value => wpt = doMove(wpt, {n:  1, e:  0}, value),
-		S: value => wpt = doMove(wpt, {n: -1, e:  0}, value),
-		W: value => wpt = doMove(wpt, {n:  0, e: -1}, value),
-		E: value => wpt = doMove(wpt, {n:  0, e:  1}, value)
+		L: value => wpt = rotate(wpt, value, -1),
+		R: value => wpt = rotate(wpt, value, 1),
+		F: value => pos = move(pos, wpt, value),
+		N: value => wpt = move(wpt, {n:  1, e:  0}, value),
+		S: value => wpt = move(wpt, {n: -1, e:  0}, value),
+		W: value => wpt = move(wpt, {n:  0, e: -1}, value),
+		E: value => wpt = move(wpt, {n:  0, e:  1}, value)
 	};
 
 	list.forEach(({cmd, value}) => commands[cmd](value));
@@ -43,11 +43,11 @@ function part2(list) {
 	return Math.abs(pos.n) + Math.abs(pos.e);
 }
 
-function doMove(pos, heading, dist) {
+function move(pos, heading, dist) {
 	return {n: pos.n + heading.n * dist, e: pos.e + heading.e * dist};
 }
 
-function doRotate(pos, degrees, dir) {
+function rotate(pos, degrees, dir) {
 	for (; degrees > 0; degrees -= 90) {
 		pos = {n: -dir * pos.e, e: dir * pos.n};
 	}
