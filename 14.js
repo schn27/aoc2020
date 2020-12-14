@@ -11,8 +11,8 @@ function calc() {
 		const [left, right] = line.split(" = ");
 
 		if (left == "mask") {
-			maskAnd = parseBin(right.replaceAll("1", "0").replaceAll("X", "1"));
-			maskOr = parseBin(right.replaceAll("X", "0"));
+			maskAnd = BigInt(parseBin(right.replaceAll("1", "0").replaceAll("X", "1")));
+			maskOr = BigInt(parseBin(right.replaceAll("X", "0")));
 		} else {
 			const addr = BigInt(+left.match(/\d+/g)[0]);
 			const value = BigInt(+right);
@@ -30,9 +30,7 @@ function calc() {
 }
 
 function parseBin(str) {
-	let res = BigInt(0);
-	str.split("").forEach(c => {res <<= BigInt(1); res |= BigInt(c == "1" ? 1 : 0);});
-	return res;
+	return str.split("").reduce((a, c) => a * 2 + (c == "1" ? 1 : 0));
 }
 
 function getAddrList(addr, maskFloat) {
