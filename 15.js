@@ -2,30 +2,23 @@
 
 function calc() {
 	const nums = input.match(/\d+/g).map(Number);
+	return getLastSpoken(nums, 2020) + " " + getLastSpoken(nums, 30000000);
+}
 
-	const spoken = new Array(30000000);
-
+function getLastSpoken(nums, turns) {
+	const spoken = new Array(turns);
 	nums.forEach((num, i) => spoken[num] = i + 1);
 
 	let delta = undefined;
+	let last = 0;
 
-	let part1 = undefined;
-	let part2 = undefined;
-
-	for (let turn = nums.length + 1;; ++turn) {
-		const last = delta || 0;
+	for (let turn = nums.length + 1; turn <= turns; ++turn) {
+		last = delta || 0;
 		delta = turn - spoken[last];
 		spoken[last] = turn;
-
-		if (turn == 2020) {
-			part1 = last;
-		} else if (turn == 30000000) {
-			part2 = last;
-			break;
-		}
 	}
 
-	return part1 + " " + part2;
+	return last;
 }
 
 const input = `0,14,6,20,1,4`;
