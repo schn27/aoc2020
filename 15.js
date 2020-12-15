@@ -9,13 +9,12 @@ function getLastSpoken(nums, turns) {
 	const spoken = new Array(turns);
 	nums.forEach((num, i) => spoken[num] = i + 1);
 
-	let delta = undefined;
-	let next = undefined;
+	let next = 0;
 
-	for (let turn = nums.length + 1; turn <= turns; ++turn) {
-		next = delta || 0;
-		delta = turn - spoken[next];
+	for (let turn = nums.length + 1; turn < turns; ++turn) {
+		const delta = turn - spoken[next];
 		spoken[next] = turn;
+		next = delta || 0;
 	}
 
 	return next;
