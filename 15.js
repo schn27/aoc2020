@@ -7,22 +7,23 @@ function calc() {
 
 	nums.forEach((num, i) => spoken[num] = i + 1);
 
-	let last = nums[nums.length - 1];
 	let delta = undefined;
 
 	let part1 = undefined;
+	let part2 = undefined;
 
-	for (let turn = nums.length + 1; turn <= 30000000; ++turn) {
-		last = delta ? delta : 0;
+	for (let turn = nums.length + 1;; ++turn) {
+		const last = delta ? delta : 0;
 		delta = turn - spoken[last];
 		spoken[last] = turn;
 
 		if (turn == 2020) {
 			part1 = last;
+		} else if (turn == 30000000) {
+			part2 = last;
+			break;
 		}
 	}
-
-	const part2 = last;
 
 	return part1 + " " + part2;
 }
