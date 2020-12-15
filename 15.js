@@ -13,7 +13,7 @@ function calc() {
 	let part2 = undefined;
 
 	for (let turn = nums.length + 1;; ++turn) {
-		const last = delta ? delta : 0;
+		const last = delta || 0;
 		delta = turn - spoken[last];
 		spoken[last] = turn;
 
