@@ -1,12 +1,10 @@
 "use strict";
 
 function calc() {
-	const map = input.split("\n").map(line => line.split(""));
-
 	let space3 = new Set();
 	let space4 = new Set();
 
-	map.forEach((row, r) => row.forEach((e, c) => {
+	input.split("\n").forEach((line, r) => line.split("").forEach((e, c) => {
 		if (e == "#") {
 			space3.add([r, c, 0].join(":"));
 			space4.add([r, c, 0, 0].join(":"));
