@@ -39,39 +39,39 @@ function getNextState(space, getNeighbors) {
 function getNeighbors3(k) {
 	const [x, y, z] = k.split(":").map(Number);
 
-	let neighbours = [];
+	let neighbors = [];
 
 	for (let xx = x - 1; xx <= x + 1; ++xx) {
 		for (let yy = y - 1; yy <= y + 1; ++yy) {
 			for (let zz = z - 1; zz <= z + 1; ++zz) {
 				if (xx != x || yy != y || zz != z) {
-					neighbours.push([xx, yy, zz].join(":"));
+					neighbors.push([xx, yy, zz].join(":"));
 				}
 			}
 		}
 	}
 
-	return neighbours;
+	return neighbors;
 }
 
 function getNeighbors4(k) {
 	const [x, y, z, w] = k.split(":").map(Number);
 
-	let neighbours = [];
+	let neighbors = [];
 
 	for (let xx = x - 1; xx <= x + 1; ++xx) {
 		for (let yy = y - 1; yy <= y + 1; ++yy) {
 			for (let zz = z - 1; zz <= z + 1; ++zz) {
 				for (let ww = w - 1; ww <= w + 1; ++ww) {
 					if (xx != x || yy != y || zz != z || ww != w) {
-						neighbours.push([xx, yy, zz, ww].join(":"));
+						neighbors.push([xx, yy, zz, ww].join(":"));
 					}
 				}
 			}
 		}
 	}
 
-	return neighbours;
+	return neighbors;
 }
 
 const input = `...###.#
