@@ -3,93 +3,62 @@
 function calc() {
 	const maths = input.split("\n").map(line => line.match(/[\d+\(\)\+\*]/g));
 
-	const part1 = maths.reduce((a, e) => a + getMath(e), 0);
+	const part1 = maths.reduce((a, e) => a + calcRpn(getRpn(e, {"*": 1, "+": 1})), 0);
 
-	const part2 = maths.reduce((a, e) => a + getMath2(e), 0);
+	const part2 = maths.reduce((a, e) => a + calcRpn(getRpn(e, {"*": 1, "+": 2})), 0);
 
 	return part1 + " " + part2;
 }
 
-function getMath(list) {
-	let res = 0;
-	let op = "";
+function calcRpn(rpn) {
+	let stack = [];
 
-	for (let i = 0; i < list.length; ++i) {
-		if (list[i] == "+" || list[i] == "*") {
-			op = list[i];
-		} else if (list[i] == "(") {
-			let j = i + 1;
+	rpn.forEach(c => {
+		if (c == "*") {
+			stack.push(+stack.pop() * +stack.pop());
+		} else if (c == "+") {
+			stack.push(+stack.pop() + +stack.pop());
+		} else {
+			stack.push(c);
+		}
+	});
 
-			for (let level = 1; level != 0; ++j) {
-				if (list[j] == "(") {
-					++level;
-				} else if (list[j] == ")") {
-					--level;
-				}
+	return stack[stack.length - 1];
+}
+
+function getRpn(list, operations) {
+	let res = [];
+	let stack = [];
+
+	list.forEach(c => {
+		if (c in operations) {
+			while (operations[c] <= operations[stack[stack.length - 1]]) {
+				res.push(stack.pop());
 			}
 
-			const arg = getMath(list.slice(i + 1, j - 1));
-			i = j - 1;
+			stack.push(c);
 
-			if (op == "+") {
-				res += arg;
-			} else if (op == "*") {
-				res *= arg;
+		} else if (c == "(") {
+			stack.push(c);
+
+		} else if (c == ")") {
+			while (stack[stack.length - 1] != "(") {
+				res.push(stack.pop());
 			}
+
+			stack.pop();
 
 		} else {
-			if (op == "+") {
-				res += +list[i];
-			} else if (op == "*") {
-				res *= +list[i];
-			}
+			res.push(c);
 		}
+	});
+
+	while (stack.length > 0) {
+		res.push(stack.pop());
 	}
 
 	return res;
 }
-
-function getMath2(list) {
-	let mem = [];
-	let op = "";
-
-	for (let i = 0; i < list.length; ++i) {
-		if (list[i] == "+" || list[i] == "*") {
-			op = list[i];
-		} else if (list[i] == "(") {
-			let j = i + 1;
-			
-			for (let level = 1; level != 0; ++j) {
-				if (list[j] == "(") {
-					++level;
-				} else if (list[j] == ")") {
-					--level;
-				}
-			}
-
-			const arg = getMath2(list.slice(i + 1, j - 1));
-			i = j - 1;
-
-			if (op == "+") {
-				mem.push(mem.pop() + arg);
-			} else {
-				mem.push(arg);
-			}
-
-		} else {
-			if (op == "+") {
-				mem.push(mem.pop() + +list[i]);
-			} else {
-				mem.push(+list[i]);
-			}
-		}
-	}
-
-	return mem.reduce((a, e) => a * e, 1);
-}
-
-
-const input2 = `((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2`;
 
 const input = `5 + (6 + 3 + (4 + 7 * 3 + 6 + 4 + 2) * 9) * 7 + 7
 5 * 8 + 3 * ((5 + 9 * 9) * (3 * 5 + 7 * 2 * 3) + 3 * 6) + 8
