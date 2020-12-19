@@ -1,34 +1,34 @@
 "use strict";
 
 function calc() {
-	const [rules, messages] = input.split("\n\n");
-
-	const rulesList = rules.split("\n").sort((a, b) => +a.match(/\d+/)[0] - +b.match(/\d+/)[0])
-			.map(r => r.split(": ")[1]);
+	const messages = input.split("\n\n")[1];
+	const rules = Object.fromEntries(input.split("\n\n")[0].split("\n").map(r => r.split(": ")));
 	
-	const re1 = new RegExp("^" + getRule(rulesList, rulesList[0]) + "$", "gm");
+	const re1 = new RegExp("^" + expand(rules, rules[0]) + "$", "gm");
 	const part1 = messages.match(re1).length;
 
-	rulesList[8] = "42 | 42 8";
-	rulesList[11] = "42 31 | 42 11 31";
+	rules[8] = "42 | 42 8";
+	rules[11] = "42 31 | 42 11 31";
 
-	const re2 = new RegExp("^" + getRule(rulesList, rulesList[0]) + "$", "gm");
+	const re2 = new RegExp("^" + expand(rules, rules[0]) + "$", "gm");
 	const part2 = messages.match(re2).length;
 
 	return part1 + " " + part2;
 }
 
-function getRule(list, rule, level = 0) {
-	if (level > 30) {	// it's just a guess
+function expand(rules, rule, level = 0) {
+	if (level > 30) {	// limit recursion level to cope with loops
 		return "";
-	}
 
-	const or = rule.split(" | ");
+	} else if (rule[0] == "\"") {
+		return rule[1];
 
-	if (or.length > 1) {
-		return "(" + getRule(list, or[0], level + 1) + "|" + getRule(list, or[1], level + 1) + ")";
+	} else if (rule.includes("|")) {
+		const [left, right] = rule.split(" | ");
+		return "(" + expand(rules, left, level + 1) + "|" + expand(rules, right, level + 1) + ")";
+
 	} else {
-		return or[0].split(" ").map(e => list[+e] != undefined ? getRule(list, list[+e], level + 1) : e.split("\"").join("")).join("");
+		return rule.match(/\d+/g).reduce((a, e) => a + expand(rules, rules[e], level + 1), "");
 	}
 }
 
