@@ -6,14 +6,14 @@ function calc() {
 	const rulesList = rules.split("\n").sort((a, b) => +a.match(/\d+/)[0] - +b.match(/\d+/)[0])
 			.map(r => r.split(": ")[1]);
 	
-	const re1 = new RegExp(getRule(rulesList, rulesList[0]), "g");
-	const part1 = messages.split("\n").filter(m => (m.match(re1) || [])[0] == m).length;
+	const re1 = new RegExp("^" + getRule(rulesList, rulesList[0]) + "$", "gm");
+	const part1 = messages.match(re1).length;
 
 	rulesList[8] = "42 | 42 8";
 	rulesList[11] = "42 31 | 42 11 31";
 
-	const re2 = new RegExp(getRule(rulesList, rulesList[0]), "g");
-	const part2 = messages.split("\n").filter(m => (m.match(re2) || [])[0] == m).length;
+	const re2 = new RegExp("^" + getRule(rulesList, rulesList[0]) + "$", "gm");
+	const part2 = messages.match(re2).length;
 
 	return part1 + " " + part2;
 }
@@ -26,7 +26,7 @@ function getRule(list, rule, level = 0) {
 	const or = rule.split(" | ");
 
 	if (or.length > 1) {
-		return "((" + getRule(list, or[0], level + 1) + ")|(" + getRule(list, or[1], level + 1) + "))";
+		return "(" + getRule(list, or[0], level + 1) + "|" + getRule(list, or[1], level + 1) + ")";
 	} else {
 		return or[0].split(" ").map(e => list[+e] != undefined ? getRule(list, list[+e], level + 1) : e.split("\"").join("")).join("");
 	}
