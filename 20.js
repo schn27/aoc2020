@@ -17,7 +17,7 @@ function calc() {
 
 	const part1 = corners.reduce((a, e) => a * e, 1);
 
-	const tileMap = getTilesMatrix(candidates, corners, border, other);
+	const tileMap = getTileMap(candidates, corners, border, other);
 	arrangeTiles(tiles, tileMap);
 	const picture = getPicture(tiles, tileMap);
 	
@@ -29,14 +29,19 @@ function calc() {
 function isAdjacent(tile1, tile2) {
 	const edges1 = getEdges(tile1);
 	const edges2 = getEdges(tile2);
-	return edges1.some(e1 => edges2.some(e2 => e1.join("") == e2.join("") || e1.join("") == [...e2].reverse().join("")));
+	return edges1.some(e => isMatchedEdges(e, edges2));
 }
 
 function getEdges(tile) {
 	return [tile[0], tile.map(r => r[r.length - 1]), tile[tile.length - 1], tile.map(r => r[0])];	
 }
 
-function getTilesMatrix(candidates, corners, border, other) {
+function isMatchedEdges(edge, tile2Edges) {
+	const edgeStr = edge.join("");
+	return tile2Edges.some(e => edgeStr == e.join("") || edgeStr == [...e].reverse().join(""));
+}
+
+function getTileMap(candidates, corners, border, other) {
 	const firstRow = [corners.pop()];
 
 	while (corners.length > 2) {
@@ -73,9 +78,8 @@ function getTilesMatrix(candidates, corners, border, other) {
 }
 
 function arrangeTiles(tiles, tileMap) {
-	tileMap.forEach((row, r) => row.forEach((tileId, c) => {
-		let tile = tiles[tileId];
-		const edges = getEdges(tile);
+	tileMap.forEach((row, r) => row.forEach((id, c) => {
+		const edges = getEdges(tiles[id]);
 
 		const rightBorder = c == (row.length - 1);
 		const bottomBorder = r == (tileMap.length - 1);
@@ -83,38 +87,18 @@ function arrangeTiles(tiles, tileMap) {
 		const sideTile1Edges = getEdges(tiles[tileMap[r][c + (rightBorder ? -1 : 1)]]);
 		const sideTile2Edges = getEdges(tiles[tileMap[r + (bottomBorder ? -1 : 1)][c]]);
 
-		const side1Index = edges.findIndex(
-			e1 => sideTile1Edges.some(e2 => e1.join("") == e2.join("") || e1.join("") == [...e2].reverse().join("")));
+		const side1Index = edges.findIndex(e => isMatchedEdges(e, sideTile1Edges));
+		const side2Index = edges.findIndex(e => isMatchedEdges(e, sideTile2Edges));
 
-		const side2Index = edges.findIndex(
-			e1 => sideTile2Edges.some(e2 => e1.join("") == e2.join("") || e1.join("") == [...e2].reverse().join("")));
-
-		let needToFlip = false;
-		let rotates = 0;
-
-		if (!rightBorder && !bottomBorder) {
-			needToFlip = ((side1Index + 1) % 4 != side2Index);
-			rotates = (4 + 2 - side2Index) % 4;
-		} else if (rightBorder && !bottomBorder) {
-			needToFlip = ((side2Index + 1) % 4 != side1Index);
-			rotates = (4 + 2 - side2Index) % 4;
-		} else if (!rightBorder && bottomBorder) {
-			needToFlip = ((side2Index + 1) % 4 != side1Index);
-			rotates = (4 - side2Index) % 4;
-		} else {
-			needToFlip = ((side1Index + 1) % 4 != side2Index);
-			rotates = (4 - side2Index) % 4;
-		}
-
-		while (rotates-- > 0) {
-			tile = rotate(tile);
+		const needToFlip = (((side1Index + (rightBorder ^ bottomBorder ? 3 : 1)) % 4) != side2Index);
+		
+		for (let rotates = ((bottomBorder ? 4 : 6) - side2Index) % 4; rotates > 0; --rotates) {
+			tiles[id] = rotate(tiles[id]);
 		}
 
 		if (needToFlip) {
-			tile = flip(tile);
+			tiles[id] = flip(tiles[id]);
 		}
-
-		tiles[tileId] = tile;
 	}));
 }
 
@@ -152,40 +136,41 @@ function getPicture(tiles, tileMap) {
 }
 
 function getHabitat(picture) {
-	const m = monster.split("\n").map(line => line.replaceAll(" ", ".").split(""));
-	const flatM = m.flatMap(e => e);
+	const monster = [
+		"                  # ",
+		"#    ##    ##    ###",
+		" #  #  #  #  #  #   "
+	];
+
+	const monsterWidth = monster[0].length;
+	const monsterHeight = monster.length;
+
+	const flatMonster = monster.map(line => line.replaceAll(" ", ".").split("")).flatMap(e => e);
+	const monsterCells = flatMonster.filter(x => x == "#").length;
 
 	const pictures = [
 		picture, rotate(picture), rotate(rotate(picture)), rotate(rotate(rotate(picture))),
 		flip(picture), rotate(flip(picture)), rotate(rotate(flip(picture))), rotate(rotate(rotate(flip(picture))))
 	];
 
-	const res = pictures.map((p, pi) => {
+	const res = pictures.map(p => {
 		let monsters = 0;
 
-		for (let r = 0; r < p.length - m.length; ++r) {
-			for (let c = 0; c < p[0].length - m[0].length; ++c) {
-				const area = [];
+		for (let r = 0; r < p.length - monsterHeight; ++r) {
+			for (let c = 0; c < p[0].length - monsterWidth; ++c) {
+				const area = p.slice(r, r + monsterHeight).flatMap(col => col.slice(c, c + monsterWidth));
 
-				for (let i = 0; i < m.length; ++i) {
-					area.push(...p[r + i].slice(c, c + m[0].length));
-				}
-
-				if (area.every((e, i) =>  e == "#" || e == flatM[i])) {
+				if (area.every((e, i) => e == "#" || e == flatMonster[i])) {
 					++monsters;
 				}
 			}
 		}
 
-		return monsters ? p.flatMap(x => x).filter(x => x == "#").length - flatM.filter(x => x == "#").length * monsters : 0;
+		return monsters ? p.flatMap(x => x).filter(x => x == "#").length - monsterCells * monsters : 0;
 	});
 
 	return Math.max(...res);
 }
-
-const monster = `                  # 
-#    ##    ##    ###
- #  #  #  #  #  #   `;
 
 const input = `Tile 3557:
 .#...##.#.
