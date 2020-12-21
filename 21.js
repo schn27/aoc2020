@@ -2,39 +2,28 @@
 
 function calc() {
 	const table = {};
-	const alrgCnt = {};
+	const totalIngredients = [];
 
 	input.split("\n").forEach(line => {
-		line.split("(contains")[1].match(/[a-z]+/g).forEach(a => alrgCnt[a] = (alrgCnt[a] || 0) + 1);
-
-		line.split("(contains")[0].match(/[a-z]+/g).forEach(i => {
-			table[i] = (table[i] || {cnt: 0, alrg: {}});
-			table[i].cnt += 1;
-
-			line.split("(contains")[1].match(/[a-z]+/g).forEach(a => {
-				table[i].alrg[a] = (table[i].alrg[a] || 0) + 1;
-			});
-		});
+		const [ingredients, allergens] = line.split("(contains").map(e => e.match(/[a-z]+/g));
+		totalIngredients.push(...ingredients);
+		allergens.forEach(a => table[a] = !table[a] ? ingredients : table[a].filter(e => ingredients.indexOf(e) >= 0));
 	});
 
-	console.log(table);
-	console.log(alrgCnt);
+	const bad = new Set(Object.values(table).flatMap(v => v));
+	const part1 = totalIngredients.filter(e => !bad.has(e)).length;
 
-	const re = new RegExp("", "gm");
+	while (Object.values(table).filter(e => e.length > 1).length > 0) {
+		const solved = new Set(Object.values(table).filter(e => e.length == 1).flatMap(v => v));
+		Object.keys(table).filter(k => table[k].length > 1).forEach(k => table[k] = table[k].filter(e => !solved.has(e)));
+	}
 
-	const part1 = input.match(re).length;
-
-	const part2 = 0;
+	const part2 = Object.keys(table).sort().map(k => table[k]).join(",");
 
 	return part1 + " " + part2;
 }
 
-const input = `mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
-trh fvjkl sbzzf mxmxvkd (contains dairy)
-sqjhc fvjkl (contains soy)
-sqjhc mxmxvkd sbzzf (contains fish)`;
-
-const input2 = `lfqhssm pcxzx jrs rxhv mhtc dvc jvd ttvtr srvzpc thzbt jfkhrp zxstb tkpqpb lcplblp jflxtnp jnqgtrq zdfl kdxht dfxfqs qdths cnzz drcj stjr jtrrnz rlh ljfsmv ptrj rdnsghf kllgt dgtxv zpxvch rfnzl xszpg qmbn nfff cxzrtx fvmzmrd szsdbv mcmrzs hfdxb slgnk szsmh zngdbgf hgndp pxxjmds pdbcdp zczv hvkvz mhzbkt qjhmth gmstmh tvmpdqp ztbgdkd xdfjsm hbfnkq fxzgqn ljclf mpzq mxsbp cjdcn jgjx gnbxs sqrk tlqtz mdghb npvv nkrpv thvbm dfdr srgh xkvgj fmj smxk khqvlxn nkvdvs tnd fqgl dhlmfn rzvj ljvx (contains dairy, sesame, nuts)
+const input = `lfqhssm pcxzx jrs rxhv mhtc dvc jvd ttvtr srvzpc thzbt jfkhrp zxstb tkpqpb lcplblp jflxtnp jnqgtrq zdfl kdxht dfxfqs qdths cnzz drcj stjr jtrrnz rlh ljfsmv ptrj rdnsghf kllgt dgtxv zpxvch rfnzl xszpg qmbn nfff cxzrtx fvmzmrd szsdbv mcmrzs hfdxb slgnk szsmh zngdbgf hgndp pxxjmds pdbcdp zczv hvkvz mhzbkt qjhmth gmstmh tvmpdqp ztbgdkd xdfjsm hbfnkq fxzgqn ljclf mpzq mxsbp cjdcn jgjx gnbxs sqrk tlqtz mdghb npvv nkrpv thvbm dfdr srgh xkvgj fmj smxk khqvlxn nkvdvs tnd fqgl dhlmfn rzvj ljvx (contains dairy, sesame, nuts)
 tfshb zxstb thzbt dfxfqs prkc qxst nzdmcf mxsbp cjdcn hfdxb hbfnkq dfdr fdknsl nvrndt hhrdrl mcmrzs nkrpv szsdbv jgkvfl slfpcp dvc nfff bmttzd snlhkm nkvdvs sdts qftpx thd qxc zpxvch rdnsghf zpp jrnqx cqvqlp tvmpdqp lbzg kcvzks grzdp zhdtt mdghb zdfl qmbn kllgt mhtc gnbxs mk fmj jmc smxk sqrk fbkpkv mhzbkt nltxdhr hjnx thtsvz fstx ffmq dvffd jfkhrp mdlr rgpvhb (contains nuts, eggs, dairy)
 txvg zjlxft fstx mk rkrqrk flrn cqvqlp ptrj pxxjmds tlst jxj fmkmrk xxgd lfrt mhtc drcj njpx fqgl kllgt hfdxb nltxdhr ztbgdkd cnzz qxc hjnx pcxzx ljclf gqsnd svbvqlq ljvx jfkhrp ndqgjs jrs cgrjf thd jrnqx slfpcp tcxz bfrj bdclf jtnfbh zxstb rlh lbzg jvd thvbm nvrndt jtrrnz cxzrtx khqvlxn vnrnn slsdck mhzbkt jlfmg zdfl gnbxs bmxlldv sstvx (contains dairy, soy)
 pxxjmds qdths mjpqlvj szsdbv rknm tnd sdts fstx sstvx zxstb lgfmt pdbcdp thtsvz vxmvk mdghb jrs rfnzl smxk rrlszk jgkvfl ljclf gmstmh lfrt fxzgqn hbfnkq tlqtz crrgj rtpgqd jmc rxkt zpp qnvml lgcrd zpxvch ltnqh fdrgkrx gqsnd grzdp ljvx zczv mhtc jnqgtrq srgh qlcvd cgrjf jrnqx hfdxb mxsbp srvzpc kpn lbzg qjhmth njpx crbbk jlfmg bmxlldv hkchvb dxbmdj zpvkl dvffd kllgt srj sqrk jvjtrxt ndqgjs rxhv jflxtnp jvd ffmq bghtk bhrv cxzrtx fnfm zvmnd xbjqr kkdzxr bdsxbd mxprt cqvqlp pbqn cmfjr (contains wheat, nuts, sesame)
