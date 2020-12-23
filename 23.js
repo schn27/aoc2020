@@ -1,65 +1,68 @@
 "use strict";
 
 function calc() {
-	const cups = input.match(/\d/g)
-		.map(c => ({cup: +c, next: null}));
+	const cups = input.match(/\d/g).map(Number);
+	const maxCup = Math.max(...cups);
+
+	const circle1 = getCircleAfterMoves(cups, maxCup, 100);
+	const part1 = toArray(circle1).slice(1).join("");
+
+	const bigCups = [...cups];
+	let nextCup = maxCup;
+
+	for (let i = 0; i < 1000000 - cups.length; ++i) {
+		bigCups.push(++nextCup);
+	}
+
+	const circle2 = getCircleAfterMoves(bigCups, nextCup, 10000000);
+	const part2 = circle2.next.cup * circle2.next.next.cup;
+
+	return part1 + " " + part2;
+}
+
+function toArray(cups) {
+	let res = [cups.cup];
+
+	for (let o = cups.next; o !== cups; o = o.next) {
+		res.push(o.cup);
+	}
+
+	return res;
+}
+
+function getCircleAfterMoves(cups, maxCup, n) {
+	cups = cups.map(c => ({cup: c, next: null}));
 
 	cups.forEach((cup, i) => {
 		cup.next = cups[(cups.length + i + 1) % cups.length];
 	});
 
+	const index = Object.fromEntries(cups.map(c => [c.cup, c]));
+
 	let cur = cups[0];
 
-	for (let i = 0; i < 10; ++i) {
-		cur = move(cur);
-		print(cur);
-	}
+	while (n-- > 0) {
+		const pick = cur.next;
+		cur.next = cur.next.next.next.next;
 
-	const part1 = 0;
+		const picked = [cur.cup, pick.cup, pick.next.cup, pick.next.next.cup];
 
-	const part2 = 0;
+		let dstCup = cur.cup;
 
-	return part1 + " " + part2;
-}
-
-function move(cur) {
-	const pick = cur.next;
-	cur.next = cur.next.next.next.next;
-
-	const remaining = [cur];
-
-	for (let o = cur.next; o !== cur; o = o.next) {
-		remaining.push(o.cup);
-	}
-
-	let dstCup = cur.next.cup;
-
-	while (remaining.indexOf(dst) < 0) {
-		--dst;
-		if (dst <= 0) {
-			dst = Math.max(...remaining);
-			break;
+		while (picked.indexOf(dstCup) >= 0) {
+			if (--dstCup <= 0) {
+				dstCup = maxCup;
+			}
 		}
+
+		const dst = index[dstCup];
+
+		[dst.next, pick.next.next.next] = [pick, dst.next];
+
+		cur = cur.next;
 	}
 
-	let dst = cur.next;
-	while (dst.cup != dstCup) {
-		dst = dst.next;
-	}
-
-	[dst.next, pick.next.next.next] = [pick, dst.next];
-
-	return cur.next;
-}
-
-function print(cur) {
-	const a = [cur.cup];
-
-	for (let o = cur.next; o !== cur; o = o.next) {
-		a.push(o.cup);
-	}
-
-	console.log(a);
+	return index[1];
 }
 
 const test = `389125467`;
