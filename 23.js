@@ -57,7 +57,8 @@ function getCircleAfterMoves(cups, maxCup, n) {
 
 		const dst = index[dstCup];
 
-		[dst.next, pick.next.next.next] = [pick, dst.next];
+		pick.next.next.next = dst.next;
+		dst.next = pick;
 
 		cur = cur.next;
 	}
