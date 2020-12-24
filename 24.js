@@ -1,29 +1,31 @@
 "use strict";
 
-const hexagonDirs = {e: [1, -1, 0], se: [0, -1, 1], sw: [-1, 0, 1], w: [-1, 1, 0], nw: [0, 1, -1], ne: [1, 0, -1]};
+const hexagonDirs = {e: [1, 0], se: [0, 1], sw: [-1, 1], w: [-1, 0], nw: [0, -1], ne: [1, -1]};
 
 function calc() {
 	const list = input.split("\n").map(line => line.match(/e|se|sw|w|nw|ne/g));
 
-	const flipped = {};
+	let black = new Set();
 
 	list.forEach(seq => {
 		const coord = seq.map(e => hexagonDirs[e])
-			.reduce(([x, y, z], [dx, dy, dz]) => [x + dx, y + dy, z + dz], [0, 0, 0]);
+			.reduce(([q, r], [dq, dr]) => [q + dq, r + dr], [0, 0])
+			.join(":");
 
-		const str = coord.join(":");
-		flipped[str] = !flipped[str];
+		if (black.has(coord)) {
+			black.delete(coord);
+		} else {
+			black.add(coord);
+		}
 	});
 
-	const part1 = Object.values(flipped).filter(v => v).length;
-
-	let state = new Set(Object.keys(flipped).filter(k => flipped[k]));
+	const part1 = black.size;
 
 	for (let i = 0; i < 100; ++i) {
-		state = getNextState(state);
+		black = getNextState(black);
 	}
 
-	const part2 = state.size;
+	const part2 = black.size;
 
 	return part1 + " " + part2;
 }
@@ -46,8 +48,8 @@ function getNextState(state) {
 }
 
 function getNeighbors(k) {
-	const [x, y, z] = k.split(":").map(Number);
-	return Object.values(hexagonDirs).map(([dx, dy, dz]) => [x + dx, y + dy, z + dz].join(":"));
+	const [q, r] = k.split(":").map(Number);
+	return Object.values(hexagonDirs).map(([dq, dr]) => [q + dq, r + dr].join(":"));
 }
 
 const input = `seweswweswnwseeeesenwneseeseee
