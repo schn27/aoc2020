@@ -1,139 +1,116 @@
 "use strict";
 
 function calc() {
-	const tiles = Object.fromEntries(input.split("\n\n").map(tile => [
-		tile.match(/\d+/).map(Number)[0], 
-		tile.split("\n").slice(1).filter(r => r.length > 0).map(r => r.split(""))
-	]));
+	const tiles = input.split("\n\n").map(tile => ({
+		id: tile.match(/\d+/).map(Number)[0], 
+		data: tile.split("\n").slice(1).filter(r => r.length > 0).map(r => r.split("")), 
+		neighbors: [null, null, null, null]
+	}));
 
-	const candidates = {};
+	arrangeTiles(tiles);
 
-	Object.keys(tiles).forEach(
-		k => candidates[k] = Object.keys(tiles).filter(kk => (kk != k) && isAdjacent(tiles[k], tiles[kk])));
-
-	const corners = Object.keys(candidates).filter(k => candidates[k].length == 2);
-	const border = Object.keys(candidates).filter(k => candidates[k].length == 3);
-	const other = Object.keys(candidates).filter(k => candidates[k].length == 4);
-
-	const part1 = corners.reduce((a, e) => a * e, 1);
-
-	const tileMap = getTileMap(candidates, corners, border, other);
-	arrangeTiles(tiles, tileMap);
-	const picture = getPicture(tiles, tileMap);
+	const part1 = tiles.filter(e => e.neighbors.filter(n => n != null).length == 2).reduce((a, e) => a * e.id, 1);
 	
-	const part2 = getHabitat(picture);
+	const part2 = getHabitat(getPicture(tiles));
 
 	return part1 + " " + part2;
 }
 
-function isAdjacent(tile1, tile2) {
-	const edges1 = getEdges(tile1);
-	const edges2 = getEdges(tile2);
-	return edges1.some(e => isMatchedEdges(e, edges2));
+function arrangeTiles(tiles) {
+	const visited = new Set();
+
+	const queue = [tiles[0]];
+	visited.add(tiles[0].id);
+
+	while (queue.length > 0) {
+		const tile = queue.shift();
+		
+		getEdges(tile.data).forEach((e, i) => {			
+			const neighbor = tiles.find(c => c.id != tile.id && isMatchedEdge(e, getEdges(c.data)));
+
+			if (neighbor != null) {
+				const neighborSide = (i + 2) % 4;
+				const transforms = [rotate, rotate, rotate, flip, rotate, rotate, rotate];
+				
+				for (let i = 0; (getEdges(neighbor.data)[neighborSide] != e) && (i < transforms.length); ++i) {
+					neighbor.data = transforms[i](neighbor.data);
+				}
+
+				tile.neighbors[i] = neighbor;
+				neighbor.neighbors[neighborSide] = tile;
+
+				if (!visited.has(neighbor.id)) {
+					queue.push(neighbor);
+				}
+
+				visited.add(neighbor.id);
+			}
+		});
+	}
 }
 
 function getEdges(tile) {
-	return [tile[0], tile.map(r => r[r.length - 1]), tile[tile.length - 1], tile.map(r => r[0])];	
+	return [tile[0], tile.map(r => r[r.length - 1]), tile[tile.length - 1], tile.map(r => r[0])]
+			.map(e => e.join(""));
 }
 
-function isMatchedEdges(edge, tile2Edges) {
-	const edgeStr = edge.join("");
-	return tile2Edges.some(e => edgeStr == e.join("") || edgeStr == [...e].reverse().join(""));
+function isMatchedEdge(edge, tile2Edges) {
+	return [...tile2Edges, ...tile2Edges.map(e => e.split("").reverse().join(""))].some(e => edge == e);
 }
 
-function getTileMap(candidates, corners, border, other) {
-	const firstRow = [corners.pop()];
+function rotate(data) {
+	const res = [...data].map(r => [...r]);
 
-	while (corners.length > 2) {
-		const prev = firstRow[firstRow.length - 2];
-		const cur = firstRow[firstRow.length - 1];
-		const next = candidates[cur].find(k => k != prev && candidates[k].length <= 3);
-		firstRow.push(next);
-		corners = corners.filter(e => e != next);
-		border = border.filter(e => e != next);
-	}
-
-	const tileMap = [firstRow];
-
-	let all = [...corners, ...border, ...other];
-
-	while (all.length > 0) {
-		const prevRow = tileMap[tileMap.length - 1];
-		const row = [all.find(b => candidates[b].indexOf(prevRow[0]) >= 0)];
-		all = all.filter(e => e != row[0]);
-
-		while (row.length < prevRow.length) {
-			const up = prevRow[row.length];
-			const left = row[row.length - 1];
-			const next = all.find(e => candidates[e].filter(ee => ee == up || ee == left).length == 2);
-			
-			row.push(next);
-			all = all.filter(e => e != next);
-		}
-
-		tileMap.push(row);
-	}
-
-	return tileMap;
-}
-
-function arrangeTiles(tiles, tileMap) {
-	tileMap.forEach((row, r) => row.forEach((id, c) => {
-		const edges = getEdges(tiles[id]);
-
-		const rightBorder = c == (row.length - 1);
-		const bottomBorder = r == (tileMap.length - 1);
-
-		const sideTile1Edges = getEdges(tiles[tileMap[r][c + (rightBorder ? -1 : 1)]]);
-		const sideTile2Edges = getEdges(tiles[tileMap[r + (bottomBorder ? -1 : 1)][c]]);
-
-		const side1Index = edges.findIndex(e => isMatchedEdges(e, sideTile1Edges));
-		const side2Index = edges.findIndex(e => isMatchedEdges(e, sideTile2Edges));
-
-		const needToFlip = (((side1Index + (rightBorder ^ bottomBorder ? 3 : 1)) % 4) != side2Index);
-		
-		for (let rotates = ((bottomBorder ? 4 : 6) - side2Index) % 4; rotates > 0; --rotates) {
-			tiles[id] = rotate(tiles[id]);
-		}
-
-		if (needToFlip) {
-			tiles[id] = flip(tiles[id]);
-		}
-	}));
-}
-
-function rotate(matrix) {
-	const res = [...matrix].map(r => [...r]);
-
-	for (let r = 0; r < matrix.length; ++r) {
-		for (let c = 0; c < matrix.length; ++c) {
-			res[r][c] = matrix[matrix.length - c - 1][r];
+	for (let r = 0; r < data.length; ++r) {
+		for (let c = 0; c < data.length; ++c) {
+			res[r][c] = data[data.length - c - 1][r];
 		}
 	}
 
 	return res;
 }
 
-function flip(matrix) {
-	return [...matrix].map(r => [...r].reverse());
+function flip(data) {
+	return [...data].map(r => [...r]).reverse();
 }
 
-function getPicture(tiles, tileMap) {
+function getPicture(tiles) {
 	const picture = [];
-	const tileSize = tiles[tileMap[0][0]].length;
+	let tileRow = [];
 
-	for (let r = 0; r < tileMap.length * tileSize; ++r) {
-		if ((r % tileSize) == 0 || (r % tileSize) == (tileSize - 1)) {
-			continue;
+	for (let t = getCorner(tiles); t != null; t = t.neighbors[1]) {
+		tileRow.push(t);
+	}
+
+	while (tileRow[0] != null) {
+		const data = [...tileRow[0].data].map(r => r.slice(1, -1));
+		
+		for (let i = 1; i < tileRow.length; ++i) {
+			data.forEach((r, ri) => r.push(...tileRow[i].data[ri].slice(1, -1)));
 		}
 
-		const row = [];
-		tileMap[Math.floor(r / tileSize)].forEach(t => row.push(...tiles[t][r % tileSize].slice(1, -1)));
-		picture.push(row);
+		picture.push(...data.slice(1, -1));
+
+		tileRow = tileRow.map(t => t.neighbors[2]);
 	}
 
 	return picture;
 }
+
+function getCorner(tiles) {
+	let tile = tiles[0];
+
+	while (tile.neighbors[0] != null) {
+		tile = tile.neighbors[0];
+	}
+
+	while (tile.neighbors[3] != null) {
+		tile = tile.neighbors[3];
+	}
+
+	return tile;
+}
+
 
 function getHabitat(picture) {
 	const monster = [
